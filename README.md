@@ -1,57 +1,98 @@
-# Sample Hardhat 3 Beta Project (`mocha` and `ethers`)
+# 🧠 Crowdfunding App – Fullstack dApp (Smart Contract + Frontend)
 
-This project showcases a Hardhat 3 Beta project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+The *Crowdfunding App* is a full-featured decentralized fundraising platform that combines an Ethereum smart contract with a modern React-based frontend. It allows campaign creators to launch, manage, and monitor tier-based fundraising efforts in a secure, transparent, and user-friendly way.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+---
 
-## Project Overview
+## ⚙ Features
 
-This example project includes:
+| Feature                | Description                                            |
+| ---------------------- | ------------------------------------------------------ |
+| Campaign metadata      | Name, description, goal, deadline, owner               |
+| Tier system            | Custom funding levels with set prices                  |
+| Contribution tracking  | Tracks user funding per tier                           |
+| Campaign lifecycle     | Active → Successful/Failed based on goal & deadline    |
+| Refunds                | Users can reclaim funds if campaign fails              |
+| Withdrawal             | Owner can withdraw ETH if campaign succeeds            |
+| Pausable               | Owner can pause/unpause the contract                   |
+| Deadline extension     | Owner can extend time during active phase              |
+| State-checking helpers | getCampaignStatus, getTiers, hasFundedTier, etc. |
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+---
 
-## Usage
+## 🧪 Technologies Used
 
-### Running Tests
+* Solidity + Hardhat 3 (for smart contract development)
+* Viem (TypeScript interface for Ethereum)
+* NextJs + TailwindCSS (frontend interface)
+* ShadCN UI (for components)
+* Hardhat Ignition (for deployment automation)
 
-To run all the tests in the project, execute the following command:
+---
 
-```shell
-npx hardhat test
-```
+## 🚀 How to Run Locally
 
-You can also selectively run the Solidity or `mocha` tests:
+### 🧾 Prerequisites
 
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
-```
+* Node.js (>= 18.x)
+* npm
+* Hardhat (npm install --save-dev hardhat)
+* Metamask or other Ethereum wallet for testing
 
-### Make a deployment to Sepolia
+---
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+### 📦 Installation & Setup
 
-To run the deployment to a local chain:
+bash
+# 1. Clone the repository
+git clone https://github.com/zohaibsiddique/crowdfundingappupgraded.git
+cd crowdfundingappupgraded
 
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
+# 2. Install dependencies
+npm install
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+# 3. Start local Hardhat network (in project root)
+npx hardhat node
 
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
 
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
+---
 
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
+### 🚀 Deploy Smart Contract
 
-After setting the variable, you can run the deployment with the Sepolia network:
+bash
+# 4. In a new terminal, deploy the contract using Hardhat Ignition
+npx hardhat ignition deploy ./ignition/modules/Token.js --network localhost
 
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+
+> 🔁 Replace localhost with your desired network like sepolia or goerli if deploying to testnets.
+
+---
+
+### 💻 Start Frontend
+
+bash
+# 5. Go to frontend directory
+cd frontend
+
+# 6. Install dependencies
+npm install
+
+# 6. Run the development server
+npm run dev
+
+
+The app will now be available at http://localhost:3000
+
+---
+
+## 🧑‍💻 Developer Notes
+
+* Contract addresses and ABI are added in frontend/contract-utils/crowdfundingfactory-abi.ts or crowdfunding-abi.ts. After deploy to any network it can be changed from there. 
+* Supports dynamic UI state changes based on contract state: campaign success, failure, refunds, etc.
+* Includes fallback error messages for common reverts like Contract is paused.
+
+---
+
+## 📄 License
+
+MIT License – feel free to fork and build on it!
