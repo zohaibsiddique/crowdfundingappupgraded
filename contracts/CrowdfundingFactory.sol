@@ -76,4 +76,12 @@ contract CrowdfundingFactory {
     function togglePause() external onlyOwner {
         paused = !paused;
     }
+
+    function getOwner() external view returns (address) {
+        return owner;
+    }
+
+    function getPaused() external view returns (bool) {
+        return paused;
+    }
 }

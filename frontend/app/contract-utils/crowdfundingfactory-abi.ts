@@ -108,6 +108,32 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "getOwner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPaused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -223,4 +249,4 @@
   ]
 // export const CROWDFUNDING_FACTORY_ADDRESS = "0x0E450e676499305baFb4d06C5069E2132BB0F849"; // Replace with your actual contract address
 
-export const CROWDFUNDING_FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Replace with your actual contract address
+export const CROWDFUNDING_FACTORY_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"; // Replace with your actual contract address
