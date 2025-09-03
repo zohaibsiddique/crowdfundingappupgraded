@@ -5,72 +5,93 @@ import { Button } from "./ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { connectFactoryContract } from "@/app/contract-utils/connect-factory-contract";
 import { ArrowRightIcon } from "lucide-react";
-import { Campaign } from "@/app/utils/interfaces/campaign";
+import { Campaign } from "@/app/contract-utils/interfaces/campaign";
 import { connectCrowdfundingContract } from "@/app/contract-utils/connect-crowdfunding-contract";
 import { Progress } from "./ui/progress";
 import CampaignsSkeleton from "./campaigns-skeleton";
 import EmptyCampaignsMsg from "./empty-campaigns-msg";
 import { useAccount } from "wagmi";
 import { ethers } from "ethers";
+import { usePublicClient } from "wagmi";
+import { CROWDFUNDING_FACTORY_ABI, CROWDFUNDING_FACTORY_ADDRESS } from "../app/contract-utils/crowdfundingfactory-abi";
+import { CROWDFUNDING_ABI } from "@/app/contract-utils/crowdfunding-abi";
+import { getContract } from "viem";
 
 export default function AllCompaigns() {
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]); 
   const [campaignDetails, setCampaignDetails] = useState<Campaign[]>([]); 
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const [loading, setLoading] = useState(true);
+  const publicClient = usePublicClient()
 
   useEffect(() => {
-    const fetchCampaigns = async () => {
-      try {
-        setLoading(true);
-        setCampaigns([]); // Reset campaigns before fetching
-        const { contract} = await connectFactoryContract();
-        const allCampaigns = await contract.getUserCampaigns(address || "");
-        setCampaigns(allCampaigns);
-
-        const campaignsData = [];
-        for (let i = 0; i < allCampaigns.length; i++) {
-          const crowdfundingContract = await connectCrowdfundingContract(allCampaigns[i].campaignAddress);
-          const [
-            name,
-            description,
-            minGoal,
-            maxGoal,
-            deadline,
-            balance,
-            state
-          ] = await Promise.all([
-            crowdfundingContract.name(),
-            crowdfundingContract.description(),
-            crowdfundingContract.minGoal(),
-            crowdfundingContract.maxGoal(),
-            crowdfundingContract.deadline(),
-            crowdfundingContract.getContractBalance(),
-            crowdfundingContract.getCampaignStatus()
-          ]);
-          campaignsData.push({
-            campaignAddress: allCampaigns[i].campaignAddress,
-            owner: allCampaigns[i].owner,
-            name,
-            description,
-            minGoal: minGoal,
-            maxGoal: maxGoal,
-            deadline: deadline,
-            balance: balance,
-            state: state,
-          });
-          setCampaignDetails(campaignsData);
-      }
-      } catch (err) {
-        console.error("Error fetching campaigns:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCampaigns();
-  }, []); 
+      const fetchCampaigns = async () => {
+        try {
+  
+          if (!publicClient) return;
+  
+          setLoading(true);
+          setCampaigns([]); // Reset campaigns before fetching
+          
+          const contract = getContract({
+            address: CROWDFUNDING_FACTORY_ADDRESS,
+            abi: CROWDFUNDING_FACTORY_ABI,
+            client: publicClient,
+          })
+          const allCampaigns = await contract.read.getUserCampaigns([address]) as Campaign[];
+          console.log("All Campaigns:", allCampaigns);
+          setCampaigns(allCampaigns);
+  
+          const campaignsData = [];
+          for (let i = 0; i < allCampaigns.length; i++) {
+            
+            const crowdfundingContract = getContract({
+              address: allCampaigns[i].campaignAddress as `0x${string}`,
+              abi: CROWDFUNDING_ABI,
+              client: publicClient,
+            }) as any;
+  
+            const [
+              name,
+              description,
+              minGoal,
+              maxGoal,
+              deadline,
+              balance,
+              state
+            ] = await Promise.all([
+              crowdfundingContract.read.name(),
+              crowdfundingContract.read.description(),
+              crowdfundingContract.read.minGoal(),
+              crowdfundingContract.read.maxGoal(),
+              crowdfundingContract.read.deadline(),
+              crowdfundingContract.read.getContractBalance(),
+              crowdfundingContract.read.getCampaignStatus()
+            ]);
+            campaignsData.push({
+              campaignAddress: allCampaigns[i].campaignAddress,
+              owner: allCampaigns[i].owner,
+              name,
+              description,
+              minGoal: minGoal,
+              maxGoal: maxGoal,
+              deadline: deadline,
+              balance: balance,
+              state: state,
+            });
+            setCampaignDetails(campaignsData);
+            
+          }
+        } catch (err) {
+          console.error("Error fetching campaigns:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchCampaigns();
+    }, []); 
 
   const getProgress = (campaign: Campaign) => {
     const progress = (Number(campaign?.balance) / Number(campaign?.maxGoal)) * 100;

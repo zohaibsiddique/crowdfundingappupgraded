@@ -11,26 +11,45 @@ import { Progress } from "./ui/progress";
 import CampaignsSkeleton from "./campaigns-skeleton";
 import EmptyCampaignsMsg from "./empty-campaigns-msg";
 import { ethers } from "ethers";
+import { getContract } from "viem";
+import { usePublicClient } from "wagmi";
+import { CROWDFUNDING_FACTORY_ABI, CROWDFUNDING_FACTORY_ADDRESS } from "../app/contract-utils/crowdfundingfactory-abi";
+import { CROWDFUNDING_ABI } from "@/app/contract-utils/crowdfunding-abi";
 
 export default function AllCompaigns() {
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]); 
   const [campaignDetails, setCampaignDetails] = useState<Campaign[]>([]); 
-
+  const publicClient = usePublicClient()
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
+
+        if (!publicClient) return;
+
         setLoading(true);
         setCampaigns([]); // Reset campaigns before fetching
-        const { contract} = await connectFactoryContract();
-        const allCampaigns = await contract.getAllCampaigns();
+        
+        const contract = getContract({
+          address: CROWDFUNDING_FACTORY_ADDRESS,
+          abi: CROWDFUNDING_FACTORY_ABI,
+          client: publicClient,
+        })
+        const allCampaigns = await contract.read.getAllCampaigns() as Campaign[];
+        console.log("All Campaigns:", allCampaigns);
         setCampaigns(allCampaigns);
 
         const campaignsData = [];
         for (let i = 0; i < allCampaigns.length; i++) {
-          const crowdfundingContract = await connectCrowdfundingContract(allCampaigns[i].campaignAddress);
+          
+          const crowdfundingContract = getContract({
+            address: allCampaigns[i].campaignAddress as `0x${string}`,
+            abi: CROWDFUNDING_ABI,
+            client: publicClient,
+          }) as any;
+
           const [
             name,
             description,
@@ -40,13 +59,13 @@ export default function AllCompaigns() {
             balance,
             state
           ] = await Promise.all([
-            crowdfundingContract.name(),
-            crowdfundingContract.description(),
-            crowdfundingContract.minGoal(),
-            crowdfundingContract.maxGoal(),
-            crowdfundingContract.deadline(),
-            crowdfundingContract.getContractBalance(),
-            crowdfundingContract.getCampaignStatus()
+            crowdfundingContract.read.name(),
+            crowdfundingContract.read.description(),
+            crowdfundingContract.read.minGoal(),
+            crowdfundingContract.read.maxGoal(),
+            crowdfundingContract.read.deadline(),
+            crowdfundingContract.read.getContractBalance(),
+            crowdfundingContract.read.getCampaignStatus()
           ]);
           campaignsData.push({
             campaignAddress: allCampaigns[i].campaignAddress,
@@ -60,7 +79,8 @@ export default function AllCompaigns() {
             state: state,
           });
           setCampaignDetails(campaignsData);
-      }
+          
+        }
       } catch (err) {
         console.error("Error fetching campaigns:", err);
       } finally {

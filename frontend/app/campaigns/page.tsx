@@ -10,6 +10,7 @@ import {
   TabsContent,
 } from "@/components/ui/tabs";
 import AllCampaigns from '@/components/all-campaigns';
+import MyCampaign from '@/components/my-campaigns';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Switch } from '@/components/ui/switch';
@@ -79,10 +80,17 @@ export default function CampaignsPage() {
       console.log("Transaction hash:", txHash); 
       // Wait for transaction confirmation
       await publicClient?.waitForTransactionReceipt({ hash: txHash});
+
       // Update paused state
-       const isPaused = await contract.read.getPaused() as boolean;
-      setIsPaused(isPaused);
+      const isPaused = await publicClient?.readContract({
+        address: CROWDFUNDING_FACTORY_ADDRESS,
+        abi: CROWDFUNDING_FACTORY_ABI,
+        functionName: "getPaused",
+      }) as boolean;
+
       console.log("Updated paused state:", isPaused);
+      setIsPaused(isPaused);
+
     } catch (err) {
       console.error("Error toggling pause:", err);
     }
@@ -130,7 +138,7 @@ export default function CampaignsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {/* <AllCampaigns/> */}
+                  <AllCampaigns/>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -165,7 +173,7 @@ export default function CampaignsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {/* <MyCompaigns/> */}
+                  <MyCampaign/>
                 </CardContent>
               </Card>
             </TabsContent>
