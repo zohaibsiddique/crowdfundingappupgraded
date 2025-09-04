@@ -24,6 +24,8 @@ The *Crowdfunding App* is a full-featured decentralized fundraising platform tha
 
 * Solidity + Hardhat 3 (for smart contract development)
 * Viem (TypeScript interface for Ethereum)
+* Wagmi — React hooks for Ethereum wallet and contract interaction
+* RainbowKit — Beautiful wallet connector UI with multi-wallet support
 * NextJs + TailwindCSS (frontend interface)
 * ShadCN UI (for components)
 * Hardhat Ignition (for deployment automation)
