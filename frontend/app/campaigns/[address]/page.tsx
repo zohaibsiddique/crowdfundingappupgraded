@@ -1,5 +1,4 @@
 'use client'
-import { CrowdfundingContract } from '@/app/contract-utils/interfaces/crowdfunding-contract';
 import { Campaign } from '@/app/contract-utils/interfaces/campaign';
 import { Tier } from '@/app/contract-utils/interfaces/tier';
 import NavBarCampaigns from '@/components/nav-bar-campaigns';
@@ -10,7 +9,6 @@ import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import { toast } from "sonner"
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import CampaignSkeleton from '@/components/campaign-skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2 } from 'lucide-react';
@@ -32,7 +30,6 @@ const CampaignPage = () => {
     const [showAddTierForm, setShowAddTierForm] = useState(false);
     const [progress, setProgress] = useState<string>("");
     const [paused, setPaused] = useState<boolean | null>(null);
-    const [contract, setContract] = useState<CrowdfundingContract | null>(null);
     const { address, isConnected } = useAccount();
     const { data: walletClient } = useWalletClient()
     const publicClient = usePublicClient()
