@@ -18,6 +18,7 @@ interface TiersSectionProps {
     setShowAddTierForm: (show: boolean) => void;
     handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    valueInEther: string;
 }
 
 const TiersSection: React.FC<TiersSectionProps> = ({
@@ -31,7 +32,9 @@ const TiersSection: React.FC<TiersSectionProps> = ({
     setShowAddTierForm,
     handleSubmit,
     handleChange,
+    valueInEther
 }) => {
+    
     return (
         <section className="mt-6">
             <div className="flex justify-between items-center mb-2">
@@ -98,11 +101,9 @@ const TiersSection: React.FC<TiersSectionProps> = ({
                     <span className="text-gray-600">No tiers available.</span>
                 )}
 
-               
-
                 {showAddTierForm && (
                     <Dialog open={showAddTierForm} onOpenChange={setShowAddTierForm}>
-                    <DialogContent className="relative [&>button[data-radix-dialog-close]]:hidden">
+                    <DialogContent className=" [&>button[data-radix-dialog-close]]:hidden">
                         <DialogHeader>
                         <DialogTitle>Add Tier</DialogTitle>
                         </DialogHeader>
@@ -120,10 +121,14 @@ const TiersSection: React.FC<TiersSectionProps> = ({
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Amount (wei)</label>
+                            {valueInEther && (
+                                <p className="text-sm text-muted-foreground mb-1">
+                                ≈ {valueInEther} ETH
+                                </p>
+                            )}
                             <input
                             name="amount"
                             type="number"
-                            placeholder="e.g. 1 Ether = 1000000000000000000 wei"
                             min="1"
                             onChange={handleChange}
                             className="w-full border rounded px-2 py-1"

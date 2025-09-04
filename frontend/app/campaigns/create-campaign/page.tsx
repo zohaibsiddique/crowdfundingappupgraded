@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import NavBarCampaigns from "@/components/nav-bar-campaigns";
-import { getContract } from 'viem'
+import { formatEther, getContract } from 'viem'
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner"
-import { ethers } from "ethers";
 import { useWalletClient, usePublicClient } from 'wagmi'
 import { CROWDFUNDING_FACTORY_ABI, CROWDFUNDING_FACTORY_ADDRESS } from "../../contract-utils/crowdfundingfactory-abi";
 
@@ -91,7 +90,7 @@ export default function CreateCampaignForm() {
   // 🔹 Convert wei to ETH
   const minGoalInEth = useMemo(() => {
     try {
-      return form._minGoal ? ethers.formatEther(form._minGoal) : "";
+      return form._minGoal ? formatEther(BigInt(form._minGoal)) : "";
     } catch {
       return "";
     }
@@ -99,7 +98,7 @@ export default function CreateCampaignForm() {
 
   const maxGoalInEth = useMemo(() => {
     try {
-      return form._maxGoal ? ethers.formatEther(form._maxGoal) : "";
+      return form._maxGoal ? formatEther(BigInt(form._maxGoal)) : "";
     } catch {
       return "";
     }

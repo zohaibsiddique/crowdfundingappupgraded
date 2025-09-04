@@ -1,5 +1,4 @@
 'use client'
-import { connectCrowdfundingContract } from '@/app/contract-utils/connect-crowdfunding-contract';
 import { CrowdfundingContract } from '@/app/contract-utils/interfaces/crowdfunding-contract';
 import { Campaign } from '@/app/contract-utils/interfaces/campaign';
 import { Tier } from '@/app/contract-utils/interfaces/tier';
@@ -8,18 +7,17 @@ import TiersSection from '@/components/tiers-section';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useAccount, useWalletClient } from 'wagmi';
+import { useEffect, useMemo, useState } from 'react';
+import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import { toast } from "sonner"
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import CampaignSkeleton from '@/components/campaign-skeleton';
-import { Anybody } from 'next/font/google';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ethers } from 'ethers';
 import { getContract } from 'viem'
-import { CROWDFUNDING_FACTORY_ABI, CROWDFUNDING_FACTORY_ADDRESS } from "../../contract-utils/crowdfundingfactory-abi";
+import { CROWDFUNDING_ABI } from '@/app/contract-utils/crowdfunding-abi';
+import { formatEther } from 'viem'
 
 const CampaignPage = () => {
     const params = useParams();
@@ -37,6 +35,7 @@ const CampaignPage = () => {
     const [contract, setContract] = useState<CrowdfundingContract | null>(null);
     const { address, isConnected } = useAccount();
     const { data: walletClient } = useWalletClient()
+    const publicClient = usePublicClient()
 
     const [form, setForm] = useState({
         name: "",
@@ -51,6 +50,13 @@ const CampaignPage = () => {
         }));
     };
 
+    const tierValueInEther = useMemo(() => {
+        try {
+          return form.amount ? formatEther(BigInt(form.amount)) : "";
+        } catch {
+          return "";
+        }
+    }, [form.amount]);
 
     useEffect(() => {
 
@@ -70,17 +76,13 @@ const CampaignPage = () => {
 
     const fetchData = async () => {
 
-        if (!walletClient) return;
+        if (!publicClient) return;
 
         const crowdfundingContract = getContract({
                 address: campaignAddress as `0x${string}`,
-                abi: CROWDFUNDING_FACTORY_ABI,
-                client: walletClient,
+                abi: CROWDFUNDING_ABI,
+                client: publicClient,
               })
-
-        // const crowdfundingContract = await connectCrowdfundingContract(campaignAddress);
-        console.log(crowdfundingContract)
-        setContract(crowdfundingContract as unknown as CrowdfundingContract);
         
         try {
             setLoading(true);
@@ -120,6 +122,7 @@ const CampaignPage = () => {
                 };
                 
             // Set the campaign state with the fetched data
+            console.log("Fetched campaign:", campaign);
             setCampaign(campaign);
 
         } catch (err) {
@@ -132,22 +135,27 @@ const CampaignPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
     
-        let isMounted = true;
         setProgress("Connecting to contract...");
     
         try {
-          if (!isMounted) return;
     
-          setProgress("Adding Tier...");
+          if (!walletClient) throw new Error("Contract not connected");
+        
+          const contract = getContract({
+                address: campaignAddress as `0x${string}`,
+                abi: CROWDFUNDING_ABI,
+                client: walletClient,
+              })
 
-          if (!contract) throw new Error("Contract not connected");
-          const tx = await contract.addTier(
+          setProgress("Adding tier...");
+          const txHash = await contract.write.addTier([
             form.name,
             BigInt(form.amount),
-          );
-          await tx.wait(); // wait for tx to confirm
+          ]);
+          // Optional: wait for confirmation
+          const receipt = await publicClient?.waitForTransactionReceipt({ hash: txHash });
 
-          if (!isMounted) return;
+          console.log("Tier added wtih receipt:", receipt);
     
           toast.success("Tier added successfully!")
           setShowAddTierForm(false)
@@ -155,25 +163,36 @@ const CampaignPage = () => {
 
           fetchData(); // Refresh campaign data after adding tier
         } catch (error: any) {
-          if (!isMounted) return;
           toast.error(error.reason || "Failed to add tier.")
           setTimeout(() => setProgress(""), 2500); // Auto close dialog after error
         }
     
         return () => {
-          isMounted = false;
-        };
+          setProgress("");};
       };
 
     const fund = async (tierIndex: number) => {
         if (!campaignAddress || !Array.isArray(campaign?.tiers)) return;
         try {
-            setProgress("Connecting to contract..." );
+            
             const tier = campaign?.tiers[tierIndex];
             if (!tier) throw new Error("Tier not found");
+
+            setProgress("Connecting to contract..." );
+            if (!walletClient) throw new Error("Contract not connected");
+        
+            const contract = getContract({
+                address: campaignAddress as `0x${string}`,
+                abi: CROWDFUNDING_ABI,
+                client: walletClient,
+              })
+
             setProgress("Sending funds...");
-            const tx = await contract?.fund(tierIndex, { value: tier.amount });
-            await tx.wait();
+            const txHash = await contract.write.fund([tierIndex], { value: tier.amount });
+
+            // Optional: wait for confirmation
+            const receipt = await publicClient?.waitForTransactionReceipt({ hash: txHash });
+            console.log("Fund sent with receipt:", receipt);
 
             toast.success("Funded successfully!")
             setTimeout(() => setProgress(""), 1500);
@@ -188,12 +207,25 @@ const CampaignPage = () => {
     const removeTier = async (tierIndex: number) => {
         if (!campaignAddress || !Array.isArray(campaign?.tiers)) return;
         try {
-            setProgress("Connecting to contract...");
             const tier = campaign.tiers[tierIndex];
             if (!tier) throw new Error("Tier not found");
+
+            setProgress("Connecting to contract...");
+
+            if (!walletClient) throw new Error("Contract not connected");
+        
+            const contract = getContract({
+                address: campaignAddress as `0x${string}`,
+                abi: CROWDFUNDING_ABI,
+                client: walletClient,
+              })
+
             setProgress("Removing Tier");
-            const tx = await contract?.removeTier(tierIndex);
-            await tx.wait();
+            const txHash = await contract.write.removeTier([tierIndex]);
+
+            // Optional: wait for confirmation
+            const receipt = await publicClient?.waitForTransactionReceipt({ hash: txHash });
+            console.log("Tier removed with receipt:", receipt);
 
             toast.success("Tier removed")
             setTimeout(() => setProgress(""), 1500);
@@ -214,9 +246,21 @@ const CampaignPage = () => {
         if (!campaignAddress) return;
         try {
             setProgress("Connecting to contract...");
+
+            if (!walletClient) throw new Error("Contract not connected");
+        
+            const contract = getContract({
+                address: campaignAddress as `0x${string}`,
+                abi: CROWDFUNDING_ABI,
+                client: walletClient,
+              })
+                
             setProgress("Withdrawing funds...");
-            const tx = await contract?.withdraw();
-            await tx.wait();
+            const txHash = await contract.write.withdraw();
+
+            // Optional: wait for confirmation
+            const receipt = await publicClient?.waitForTransactionReceipt({ hash: txHash });
+            console.log("Withdraw receipt:", receipt);
 
             toast.success("Withdraw successfully!")
             setTimeout(() => setProgress(""), 1500);
@@ -230,9 +274,21 @@ const CampaignPage = () => {
         if (!campaignAddress) return;
         try {
             setProgress("Connecting to contract...");
+
+            if (!walletClient) throw new Error("Contract not connected");
+        
+            const contract = getContract({
+                address: campaignAddress as `0x${string}`,
+                abi: CROWDFUNDING_ABI,
+                client: walletClient,
+              })
+
             setProgress("Refunding...");
-            const tx = await contract?.refund();
-            await tx.wait();
+            const txHash = await contract.write.refund();
+
+            // Optional: wait for confirmation
+            const receipt = await publicClient?.waitForTransactionReceipt({ hash: txHash });
+            console.log("refund with receipt:", receipt);
 
             toast.success("Refund successfull!")
             setTimeout(() => setProgress(""), 1500);
@@ -244,12 +300,31 @@ const CampaignPage = () => {
 
     // Toggle handler
     const togglePause = async () => {
-        if (!contract) return;
         try {
-            const tx = await contract.togglePause();
-            await tx.wait(); // wait for tx to confirm
-            const pauseState = await contract.paused();
-            setPaused(pauseState);
+
+            if (!walletClient) throw new Error("Contract not connected");
+        
+            const contract = getContract({
+                address: campaignAddress as `0x${string}`,
+                abi: CROWDFUNDING_ABI,
+                client: walletClient,
+              })
+
+            const txHash = await contract.write.togglePause();
+
+             // Optional: wait for confirmation 
+            const receipt = await publicClient?.waitForTransactionReceipt({ hash: txHash });
+            console.log("Toggle done with recipt :", receipt);
+
+            if (!publicClient) throw new Error("Contract not connected");
+            const contractRead = getContract({
+                address: campaignAddress as `0x${string}`,
+                abi: CROWDFUNDING_ABI,
+                client: publicClient,
+              })
+            const pauseState = await contractRead.read.paused();
+            setPaused(pauseState as boolean);
+
         } catch (error: any) {
             toast.error(error.reason || "Failed to toggle.")
         }
@@ -281,7 +356,7 @@ const CampaignPage = () => {
 
                 <div className="max-w-xl mx-auto my-4 ">
                     
-                    {isOwner() && (campaign?.state == 1 || campaign?.state == 1) && (
+                    {isOwner() && (campaign?.state == 1) && (
                         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-4 rounded mb-4" role="alert">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div>
@@ -321,7 +396,7 @@ const CampaignPage = () => {
                     <div className="w-fit mx-auto border border-gray-300 rounded-md p-4 my-4 text-center">
                         <span className="block text-sm text-gray-700">Balance</span>
                         <span className=" text-lg font-bold">
-                            {campaign?.balance ? ethers.formatEther(campaign.balance) : "0"} ETH
+                            {campaign?.balance ? formatEther(campaign.balance) : "0"} ETH
                         </span>
                     </div>
                    
@@ -340,18 +415,18 @@ const CampaignPage = () => {
                     
 
                     <div className="text-xs text-muted-foreground text-right">
-                        {Number(campaign?.balance)} / {Number(campaign?.maxGoal)}
+                        {campaign?.balance ? formatEther(campaign.balance) : "0"} / {campaign?.maxGoal ? formatEther(campaign.maxGoal) : "0"}
                     </div>
                     <Progress value={getProgress()} />
 
                     <div className='mt-2'>
                         <span className='mr-4'>Minimum Goal:</span>
-                        <span className="">{campaign?.minGoal ? ethers.formatEther(campaign.minGoal) : "0"} ETH</span>
+                        <span className="">{campaign?.minGoal ? formatEther(campaign.minGoal) : "0"} ETH</span>
                     </div>
 
                     <div className='mt-2'>
                         <span className='mr-4'>Maximum Goal:</span>
-                        <span className="  ">{campaign?.maxGoal ? ethers.formatEther(campaign.maxGoal) : "0"} ETH</span>
+                        <span className="  ">{campaign?.maxGoal ? formatEther(campaign.maxGoal) : "0"} ETH</span>
                     </div>
 
                         <div className='mt-2'>
@@ -373,6 +448,7 @@ const CampaignPage = () => {
                         setShowAddTierForm={setShowAddTierForm}
                         handleSubmit={handleSubmit}
                         handleChange={handleChange}
+                        valueInEther={tierValueInEther}
                     />
                 </div>
             )}

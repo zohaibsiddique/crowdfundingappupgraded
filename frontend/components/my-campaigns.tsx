@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
-import { connectFactoryContract } from "@/app/contract-utils/connect-factory-contract";
 import { ArrowRightIcon } from "lucide-react";
 import { Campaign } from "@/app/contract-utils/interfaces/campaign";
-import { connectCrowdfundingContract } from "@/app/contract-utils/connect-crowdfunding-contract";
 import { Progress } from "./ui/progress";
 import CampaignsSkeleton from "./campaigns-skeleton";
 import EmptyCampaignsMsg from "./empty-campaigns-msg";
