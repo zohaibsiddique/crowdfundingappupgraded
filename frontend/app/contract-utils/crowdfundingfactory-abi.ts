@@ -247,6 +247,6 @@
       "type": "function"
     }
   ]
-// export const CROWDFUNDING_FACTORY_ADDRESS = "0x0E450e676499305baFb4d06C5069E2132BB0F849"; // Replace with your actual contract address
+export const CROWDFUNDING_FACTORY_ADDRESS = "0xB0E49f787547269b85ce439FdDdc9B32C7a698c9"; // Replace with your actual contract address
 
-export const CROWDFUNDING_FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Replace with your actual contract address
+// export const CROWDFUNDING_FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Replace with your actual contract address
