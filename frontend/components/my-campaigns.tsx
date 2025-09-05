@@ -9,11 +9,10 @@ import { Progress } from "./ui/progress";
 import CampaignsSkeleton from "./campaigns-skeleton";
 import EmptyCampaignsMsg from "./empty-campaigns-msg";
 import { useAccount } from "wagmi";
-import { ethers } from "ethers";
 import { usePublicClient } from "wagmi";
 import { CROWDFUNDING_FACTORY_ABI, CROWDFUNDING_FACTORY_ADDRESS } from "../app/contract-utils/crowdfundingfactory-abi";
 import { CROWDFUNDING_ABI } from "@/app/contract-utils/crowdfunding-abi";
-import { getContract } from "viem";
+import { formatEther, getContract } from "viem";
 
 export default function AllCompaigns() {
 
@@ -125,7 +124,7 @@ export default function AllCompaigns() {
               <p>{details.description}</p>
 
               <div className="text-xs text-muted-foreground text-right">
-                {details.balance ? ethers.formatEther(details.balance) : "0"} ETH / {details.maxGoal ? ethers.formatEther(details.maxGoal) : "0"} ETH
+                {details.balance ? formatEther(details.balance) : "0"} ETH / {details.maxGoal ? formatEther(details.maxGoal) : "0"} ETH
               </div>
               <Progress className="mt-1" value={getProgress(details)} />
 

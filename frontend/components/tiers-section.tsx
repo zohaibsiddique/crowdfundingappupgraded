@@ -5,7 +5,7 @@ import { ConfirmationDialog } from "./confirmation-dialog";
 import { Tier } from "@/app/contract-utils/interfaces/tier";
 import { Card, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
-import { ethers } from "ethers";
+import { formatEther } from 'viem'
 
 interface TiersSectionProps {
     tiers: Tier[];
@@ -62,7 +62,7 @@ const TiersSection: React.FC<TiersSectionProps> = ({
                                         <h4 className="font-semibold">{tier.name}</h4>
                                          {
                                             tier.amount
-                                                ? ethers.formatEther(tier.amount) + " ETH"
+                                                ? formatEther(tier.amount) + " ETH"
                                                 : "0 ETH"
                                         }
                                         <p className="text-sm text-gray-600">
