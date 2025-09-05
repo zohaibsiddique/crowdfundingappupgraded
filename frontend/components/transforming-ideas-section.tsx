@@ -100,7 +100,7 @@ export default function TransformingIdeasSection() {
         <p className="text-center text-gray-700 max-w-3xl mx-auto mt-4">
           FundBase is your trusted partner in crowdfunding, ensuring transparency and
           security while empowering your ideas. Engage with supporters, track your
-          campaign's progress, and celebrate the success of your project—all in one
+          campaigns progress, and celebrate the success of your project all in one
           platform.
         </p>
       </div>

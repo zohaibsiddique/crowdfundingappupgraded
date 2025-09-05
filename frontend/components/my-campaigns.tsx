@@ -89,7 +89,7 @@ export default function AllCompaigns() {
       };
   
       fetchCampaigns();
-    }, []); 
+    }, [address, publicClient]); 
 
   const getProgress = (campaign: Campaign) => {
     const progress = (Number(campaign?.balance) / Number(campaign?.maxGoal)) * 100;

@@ -21,9 +21,7 @@ const CampaignPage = () => {
     const params = useParams();
     const campaignAddress = params?.address as string | undefined;
 
-    if (!campaignAddress) {
-        return <div>Loading...</div>;
-    }
+  
 
     const [campaign, setCampaign] = useState<Campaign | null>(null);
     const [loading, setLoading] = useState(true);
@@ -33,6 +31,8 @@ const CampaignPage = () => {
     const { address, isConnected } = useAccount();
     const { data: walletClient } = useWalletClient()
     const publicClient = usePublicClient()
+
+   
 
     const [form, setForm] = useState({
         name: "",
@@ -55,6 +55,8 @@ const CampaignPage = () => {
         }
     }, [form.amount]);
 
+     
+
     useEffect(() => {
 
         const init = async () => {
@@ -65,12 +67,13 @@ const CampaignPage = () => {
             }
         };
 
-        if (address) {
-            init();
-        }
+        init();
 
     }, [address, isConnected]);
 
+    if (!campaignAddress) {
+        return <div>Loading...</div>;
+    }
     const fetchData = async () => {
 
         if (!publicClient) return;

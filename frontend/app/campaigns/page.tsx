@@ -62,7 +62,7 @@ export default function CampaignsPage() {
         }
       };
       init();
-    }, []);
+    }, [publicClient]);
 
      // Toggle handler
   const togglePause = async () => {

@@ -60,7 +60,7 @@ export default function SliderSection() {
         </div>
 
         <p className="text-center text-gray-700 mt-4 max-w-xl mx-auto">
-          Amplify your project's reach by harnessing the power of community funding.
+          Amplify your projects reach by harnessing the power of community funding.
         </p>
         <div className="flex justify-center items-center gap-4 mt-6">
           

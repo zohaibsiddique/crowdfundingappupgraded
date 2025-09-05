@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DeleteIcon, TrashIcon } from "lucide-react";
+import { TrashIcon } from "lucide-react";
 
 interface ConfirmationDialogProps {
   onConfirm: () => Promise<void>;

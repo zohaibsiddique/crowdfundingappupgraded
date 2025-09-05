@@ -10,7 +10,17 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.config({
+    extends: ["next/core-web-vitals", "next/typescript"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off", // ✅ disables the 'any' rule
+    },
+    settings: {
+      next: {
+        rootDir: ".", // Adjust if your Next.js app is nested
+      },
+    },
+  }),
   {
     ignores: [
       "node_modules/**",

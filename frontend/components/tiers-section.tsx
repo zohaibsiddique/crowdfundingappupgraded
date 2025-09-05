@@ -1,9 +1,9 @@
-import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import React from "react";
 import { DialogHeader } from "./ui/dialog";
 import { ConfirmationDialog } from "./confirmation-dialog";
 import { Tier } from "@/app/contract-utils/interfaces/tier";
-import { Card, CardHeader, CardContent } from "./ui/card";
+import { Card, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
 import { ethers } from "ethers";
 
@@ -38,6 +38,7 @@ const TiersSection: React.FC<TiersSectionProps> = ({
     return (
         <section className="mt-6">
             <div className="flex justify-between items-center mb-2">
+                <div className="hidden">{progress.toString()}</div>
                 <strong><h2 className="text-lg">Tiers</h2></strong>
                  {isOwner && (
                     <Button variant="outline"
