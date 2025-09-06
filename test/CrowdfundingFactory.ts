@@ -4,7 +4,7 @@ import { network } from "hardhat";
 
 const { ethers } = await network.connect();
 
-describe("Counter", function () {
+describe("CrowdfundingFactory", function () {
   let factory: any;
   let owner: any;
   let user: any;
