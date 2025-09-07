@@ -30,7 +30,7 @@ export default function Home() {
         <FaqSection/>
       </main>
       
-      {/* --- Footer Section --- */}
+      
       <FooterSection/>
     </div>
   );
