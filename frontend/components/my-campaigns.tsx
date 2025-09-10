@@ -121,7 +121,7 @@ export default function AllCompaigns() {
             </CardHeader>
 
             <CardContent>
-              <p>{details.description}</p>
+              <p>{details.description.slice(0, 100)}...</p>
 
               <div className="text-xs text-muted-foreground text-right">
                 {details.balance ? formatEther(details.balance) : "0"} ETH / {details.maxGoal ? formatEther(details.maxGoal) : "0"} ETH
