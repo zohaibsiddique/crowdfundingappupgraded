@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { getContract } from 'viem'
 import { CROWDFUNDING_ABI } from '@/app/contract-utils/crowdfunding-abi';
 import { formatEther } from 'viem'
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 const CampaignPage = () => {
     const params = useParams();
@@ -350,8 +351,16 @@ const CampaignPage = () => {
             </Dialog>
 
             
-            {loading ? (
-                    <CampaignSkeleton/>
+            
+            {!walletClient ? (
+                <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800">
+                    <div className="text-3xl font-bold mb-4">🔒 Wallet not connected</div>
+                   <ConnectButton/>
+                </div>
+
+
+                ) : loading ? (
+                    <CampaignSkeleton />
                 ) : (
 
                 <div className="max-w-xl mx-auto my-4 ">
